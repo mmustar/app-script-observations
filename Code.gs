@@ -1,4 +1,4 @@
-function myFunction() {
+function fillObservations() {
   var caseArbitreSamedi = 7;
   var caseArbitreDimanche = 8; //Case dans la sheet Arbitres
 
@@ -28,13 +28,16 @@ function myFunction() {
   
   
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Next");
+  var histo = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Historique");
   sheet.clear()
   sheet.getRange("B3:B3").setValue("Prochaines observations");
   for(var j=0;j<tableau.length;j++) {
-    sheet.getRange(4+j, 2, 1, 3).setValues([[samedi, tableau[j][0], tableau[j][1]]]);
+    sheet.getRange(4+j, 2, 1, 4).setValues([[samedi, tableau[j][0], tableau[j][1], tableau[j][2]]]);
+    histo.appendRow([samedi, tableau[j][0], tableau[j][1], tableau[j][2]]);
   }
   for(var z=0;z<tableau2.length;z++) {
-    sheet.getRange(4+j+z, 2, 1, 3).setValues([[samedi, tableau2[j][0], tableau2[j][1]]]);
+    sheet.getRange(4+j+z, 2, 1, 4).setValues([[dimanche, tableau2[z][0], tableau2[z][1], tableau2[z][2]]]);
+    histo.appendRow([dimanche, tableau2[z][0], tableau2[z][1], tableau2[z][2]]);
   }
   
 }
@@ -47,7 +50,7 @@ function getObservateursDate(dateJour) {
     if(dates[i].valueOf() == dateJour.valueOf()) 
       break;
   }
-  var observateurs = sheet.getRange("A1:E4").getValues();
+  var observateurs = sheet.getRange("A1:E50").getValues();
   for each(observateur in observateurs) {
     if(observateur[i] == "OUI")
       result.push(observateur);
@@ -58,7 +61,7 @@ function getObservateursDate(dateJour) {
 function getArbitres(day, number) {
   var result = [];
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("JAD");
-    var arbitres = sheet.getRange("A2:I5").getValues();
+    var arbitres = sheet.getRange("A2:I102").getValues();
     var prio = 0;
     var index = 1;
   while (prio < 5) {
@@ -70,7 +73,7 @@ function getArbitres(day, number) {
       if(arbitre[day] == 'OUI' && arbitre[3] == prio && arbitre[5] < arbitre[4] && arbitre[8] != "OUI") {
         arbitre[8] = "OUI";
         arbitre[5]++;
-        //Logger.log(arbitre);
+        Logger.log(arbitre);
         //Logger.log(sheet.getRange(index+2, 1, 1, 9).getA1Notation());
         sheet.getRange(index+2, 1, 1, 9).setValues([arbitre]);
         result.push(arbitre);
@@ -86,8 +89,8 @@ function getArbitres(day, number) {
 function creerTableau(Obs, arbitres) {
   var tableau = [];
   if(Obs.length > 0 && arbitres.length > 0) {
-    for(var i=0; i<Obs.length; i++) {
-      tableau.push([Obs[i][0] + " " + Obs[i][1], arbitres[i][0] + " " + arbitres[i][1]]);
+    for(var i=0; i<Math.min(Obs.length,arbitres.length); i++) {
+      tableau.push([Obs[i][0] + " " + Obs[i][1], arbitres[i][0] + " " + arbitres[i][1], arbitres[i][2]]);
     }
   }
   return tableau;
